@@ -5,7 +5,9 @@ RoamStay - Vacation Rental Platform
 A brief introduction of your project goes here. You may want to cover the purpose of your project, its core functionality, and what problems it solves.
 
 ## Deplolyed App
-https://deployed-site.whatever
+
+frontend=https://vacation-rental-platform-kappa.vercel.app/
+backend=https://roamstay-vacation-rental-platform.onrender.com/
 
 ## Video Walkthrough of the project
 
