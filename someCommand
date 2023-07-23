@@ -1,0 +1,7 @@
+# Vacation_Rental_Platform
+
+to_see_all_python_packages=pip freeze
+to_create_python_vitual_environment=python3 -m venv sample_venv
+to_activate_python_virtual_environment=.\sample_venv\Scripts\activate
+to_list_down_all_packages=pip freeze > requirements.txt
+to_install_all_list_down_packages=pip install -r requirements.txt
