@@ -12,7 +12,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origin": "*"}})
+CORS(app)
 bcrypt = Bcrypt(app)
 mongoUrl = os.getenv("MONGO_URI")
 secret_key = os.getenv("SECRET_KEY")
@@ -54,27 +54,27 @@ class Property(Document):
     price = IntField(required=True)
 
     # Reference field for the relationship with the 'Host' collection
-    host_ref = ReferenceField("Host", reverse_delete_rule=2)  # 2: CASCADE
+    # host_ref = ReferenceField("Host", reverse_delete_rule=2)  # 2: CASCADE
 
 
-class Guest(Document):
-    name = StringField(required=True, max_length=100)
-    gender = StringField(choices=["Male", "Female", "Other"])
-    date_of_birth = DateField()
-    bio = StringField()
+# class Guest(Document):
+#     name = StringField(required=True, max_length=100)
+#     gender = StringField(choices=["Male", "Female", "Other"])
+#     date_of_birth = DateField()
+#     bio = StringField()
 
 
-class Booking(Document):
-    property_id = IntField(required=True)
-    guest_id = IntField(required=True)
-    check_in = DateField(required=True)
-    check_out = DateField(required=True)
-    booking_date = DateTimeField(default=datetime.utcnow)
+# class Booking(Document):
+#     property_id = IntField(required=True)
+#     guest_id = IntField(required=True)
+#     check_in = DateField(required=True)
+#     check_out = DateField(required=True)
+#     booking_date = DateTimeField(default=datetime.utcnow)
 
-    # Reference fields for the relationships with other collections
-    property_ref = ReferenceField(
-        "Property", reverse_delete_rule=2)  # 2: CASCADE
-    guest_ref = ReferenceField("Guest", reverse_delete_rule=2)
+#     # Reference fields for the relationships with other collections
+#     property_ref = ReferenceField(
+#         "Property", reverse_delete_rule=2)  # 2: CASCADE
+#     guest_ref = ReferenceField("Guest", reverse_delete_rule=2)
 
 
 @app.route('/', methods=["GET"])
