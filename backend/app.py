@@ -1,10 +1,10 @@
-from mongoengine import Document, StringField, IntField, EnumField, DateField, DateTimeField, ReferenceField, ListField, connect, DictField
+# from mongoengine import Document, StringField, IntField, EnumField, DateField, DateTimeField, ReferenceField, ListField, connect, DictField
 from datetime import datetime, timedelta
 import json
 from flask_pymongo import PyMongo
 import jwt
 import os
-import requests
+# import requests
 from bson import json_util, ObjectId
 from flask import Flask, jsonify, request
 from flask_bcrypt import Bcrypt
@@ -24,20 +24,20 @@ db = PyMongo(app).db
 bcrypt = Bcrypt(app)
 
 # Define default connection
-connect('vacationrental', host=mongoUrl)
+# connect('vacationrental', host=mongoUrl)
 
 # Define the schema for the Host collection using mongoengine
 
 
-class Host(Document):
-    name = StringField(required=True)
-    host_status = StringField(
-        choices=["Active", "Inactive", "Pending"], required=True)
-    location = StringField()
-    email = StringField(required=True)
-    password = StringField(required=True)
-    about = StringField()
-    hosting_since = DateTimeField(default=datetime.utcnow, required=True)
+# class Host(Document):
+#     name = StringField(required=True)
+#     host_status = StringField(
+#         choices=["Active", "Inactive", "Pending"], required=True)
+#     location = StringField()
+#     email = StringField(required=True)
+#     password = StringField(required=True)
+#     about = StringField()
+#     hosting_since = DateTimeField(default=datetime.utcnow, required=True)
 
 
 # class Property(Document):
