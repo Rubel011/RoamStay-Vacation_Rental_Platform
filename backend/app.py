@@ -11,7 +11,7 @@ from flask import Flask, jsonify, request
 # from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
-port=os.getenv('PORT') or 8000
+port=os.getenv('PORT')
 app = Flask(__name__)
 # CORS(app)
 # bcrypt = Bcrypt(app)
