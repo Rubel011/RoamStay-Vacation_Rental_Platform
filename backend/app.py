@@ -11,6 +11,7 @@ from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
+port=os.getenv('PORT') or 8000
 app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
@@ -39,19 +40,19 @@ class Host(Document):
     hosting_since = DateTimeField(default=datetime.utcnow, required=True)
 
 
-class Property(Document):
-    host_id = IntField(required=True)
-    property_name = StringField(required=True)
-    property_type = StringField(
-        choices=["Apartment", "House", "Unique Homes"], default="House")
-    description = StringField()
-    address = StringField(max_length=200)
-    city = StringField(max_length=100)
-    state = StringField(max_length=100)
-    zip_code = StringField(max_length=20)
-    image_url = StringField()
-    sub_img_urls = ListField(StringField())
-    price = IntField(required=True)
+# class Property(Document):
+#     host_id = IntField(required=True)
+#     property_name = StringField(required=True)
+#     property_type = StringField(
+#         choices=["Apartment", "House", "Unique Homes"], default="House")
+#     description = StringField()
+#     address = StringField(max_length=200)
+#     city = StringField(max_length=100)
+#     state = StringField(max_length=100)
+#     zip_code = StringField(max_length=20)
+#     image_url = StringField()
+#     sub_img_urls = ListField(StringField())
+#     price = IntField(required=True)
 
     # Reference field for the relationship with the 'Host' collection
     # host_ref = ReferenceField("Host", reverse_delete_rule=2)  # 2: CASCADE
@@ -107,16 +108,17 @@ def create_host():
             return jsonify({"message": "you are already registered"}), 401
 
         # Insert host data into the MongoDB collection
-        setHost = Host(
-            name=name,
-            host_status=host_status,
-            location=location,
-            email=email,
-            password=bcrypt_pass,
-            about=about,
-            hosting_since=hosting_since
+        db.host.insert_one({
+            "name":name,
+            "host_status":host_status,
+            "location":location,
+            "email":email,
+            "password":bcrypt_pass,
+            "about":about,
+            "hosting_since":hosting_since
+        }
         )
-        setHost.save()
+        # setHost.save()
         return jsonify({"message": "Host created successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -153,6 +155,7 @@ def login_host():
 @app.route("/host/all", methods=["GET"])
 def host_all():
     allHosts = db.host.find()
+
     return json.loads(json_util.dumps(allHosts))
 
 
@@ -213,103 +216,103 @@ def manage_host(host_id):
             return jsonify({"error": str(e)}), 500
 
 
-@app.route('/property', methods=['POST'])
-def create_property():
-    try:
-        data = request.json
-        host_id = int(data.get('host_id'))
-        property_name = data.get('property_name')
-        property_type = data.get('property_type')
-        description = data.get('description')
-        address = data.get('address')
-        city = data.get('city')
-        state = data.get('state')
-        zip_code = data.get('zip_code')
-        image_url = data.get('image_url')
-        sub_img_urls = data.get('sub_img_urls')
-        price = int(data.get('price'))
+# @app.route('/property', methods=['POST'])
+# def create_property():
+#     try:
+#         data = request.json
+#         host_id = int(data.get('host_id'))
+#         property_name = data.get('property_name')
+#         property_type = data.get('property_type')
+#         description = data.get('description')
+#         address = data.get('address')
+#         city = data.get('city')
+#         state = data.get('state')
+#         zip_code = data.get('zip_code')
+#         image_url = data.get('image_url')
+#         sub_img_urls = data.get('sub_img_urls')
+#         price = int(data.get('price'))
 
-        # Create a Property object
-        setProperty = Property(
-            host_id=host_id,
-            property_name=property_name,
-            property_type=property_type,
-            description=description,
-            address=address,
-            city=city,
-            state=state,
-            zip_code=zip_code,
-            image_url=image_url,
-            sub_img_urls=sub_img_urls,
-            price=price
-        )
+#         # Create a Property object
+#         setProperty = Property(
+#             host_id=host_id,
+#             property_name=property_name,
+#             property_type=property_type,
+#             description=description,
+#             address=address,
+#             city=city,
+#             state=state,
+#             zip_code=zip_code,
+#             image_url=image_url,
+#             sub_img_urls=sub_img_urls,
+#             price=price
+#         )
 
-        setProperty.save()
+#         setProperty.save()
 
-        return jsonify({"message": "Property created successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#         return jsonify({"message": "Property created successfully"}), 201
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/property/<property_id>', methods=['GET', 'PUT', 'DELETE'])
-def manage_property(property_id):
-    if request.method == 'GET':
-        try:
-            property_data = db.property.find_one(
-                {"_id": ObjectId(property_id)})
-            if property_data:
-                # Convert ObjectId to str for JSON serialization
-                property_data['_id'] = str(property_data['_id'])
+# @app.route('/property/<property_id>', methods=['GET', 'PUT', 'DELETE'])
+# def manage_property(property_id):
+#     if request.method == 'GET':
+#         try:
+#             property_data = db.property.find_one(
+#                 {"_id": ObjectId(property_id)})
+#             if property_data:
+#                 # Convert ObjectId to str for JSON serialization
+#                 property_data['_id'] = str(property_data['_id'])
 
-                return jsonify(property_data)
-            return jsonify({"message": "Property not found"}), 404
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+#                 return jsonify(property_data)
+#             return jsonify({"message": "Property not found"}), 404
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
 
-    elif request.method == 'PUT':
-        try:
-            data = request.json
-            property_name = data.get('property_name')
-            property_type = data.get('property_type')
-            description = data.get('description')
-            address = data.get('address')
-            city = data.get('city')
-            state = data.get('state')
-            zip_code = data.get('zip_code')
-            image_url = data.get('image_url')
-            sub_img_urls = data.get('sub_img_urls')
+#     elif request.method == 'PUT':
+#         try:
+#             data = request.json
+#             property_name = data.get('property_name')
+#             property_type = data.get('property_type')
+#             description = data.get('description')
+#             address = data.get('address')
+#             city = data.get('city')
+#             state = data.get('state')
+#             zip_code = data.get('zip_code')
+#             image_url = data.get('image_url')
+#             sub_img_urls = data.get('sub_img_urls')
 
-            # Convert sub_img_urls list to a JSON serializable format
-            sub_img_urls = [str(url) for url in sub_img_urls]
+#             # Convert sub_img_urls list to a JSON serializable format
+#             sub_img_urls = [str(url) for url in sub_img_urls]
 
-            # Update property data in the MongoDB collection
-            db.property.update_one({"id": property_id}, {
-                "$set": {
-                    "property_name": property_name,
-                    "property_type": property_type,
-                    "description": description,
-                    "address": address,
-                    "city": city,
-                    "state": state,
-                    "zip_code": zip_code,
-                    "image_url": image_url,
-                    "sub_img_urls": sub_img_urls
-                }
-            })
+#             # Update property data in the MongoDB collection
+#             db.property.update_one({"id": property_id}, {
+#                 "$set": {
+#                     "property_name": property_name,
+#                     "property_type": property_type,
+#                     "description": description,
+#                     "address": address,
+#                     "city": city,
+#                     "state": state,
+#                     "zip_code": zip_code,
+#                     "image_url": image_url,
+#                     "sub_img_urls": sub_img_urls
+#                 }
+#             })
 
-            return jsonify({"message": "Property updated successfully"}), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+#             return jsonify({"message": "Property updated successfully"}), 200
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
 
-    elif request.method == 'DELETE':
-        try:
-            # Delete property from the MongoDB collection
-            mongo.db.property.delete_one({"id": property_id})
+#     elif request.method == 'DELETE':
+#         try:
+#             # Delete property from the MongoDB collection
+#             db.property.delete_one({"id": property_id})
 
-            return jsonify({"message": "Property deleted successfully"}), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+#             return jsonify({"message": "Property deleted successfully"}), 200
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=os.getenv('PORT'))
+    app.run(debug=True, port=port)
