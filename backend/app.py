@@ -1,27 +1,27 @@
 # from mongoengine import Document, StringField, IntField, EnumField, DateField, DateTimeField, ReferenceField, ListField, connect, DictField
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 import json
 from flask_pymongo import PyMongo
-import jwt
+# import jwt
 import os
 # import requests
-from bson import json_util, ObjectId
+# from bson import json_util, ObjectId
 from flask import Flask, jsonify, request
-from flask_bcrypt import Bcrypt
-from flask_cors import CORS
+# from flask_bcrypt import Bcrypt
+# from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 port=os.getenv('PORT') or 8000
 app = Flask(__name__)
-CORS(app)
-bcrypt = Bcrypt(app)
+# CORS(app)
+# bcrypt = Bcrypt(app)
 mongoUrl = os.getenv("MONGO_URI")
 secret_key = os.getenv("SECRET_KEY")
 # Set up MongoDB connection using flask_pymongo
 app.config["MONGO_URI"] = mongoUrl
 db = PyMongo(app).db
 
-bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 
 # Define default connection
 # connect('vacationrental', host=mongoUrl)
@@ -89,131 +89,131 @@ def index():
     return jsonify({"success": "this is the home page , running successfully"})
 
 
-@app.route('/host/register', methods=['POST'])
-def create_host():
-    try:
-        data = request.json
-        name = data.get('name')
-        host_status = data.get('host_status')
-        location = data.get('location')
-        about = data.get('about')
-        hosting_since = data.get('hosting_since')
-        password = data.get('password')
-        email = data.get('email')
-        bcrypt_pass = bcrypt.generate_password_hash(
-            password, rounds=5).decode("UTF-8")
+# @app.route('/host/register', methods=['POST'])
+# def create_host():
+#     try:
+#         data = request.json
+#         name = data.get('name')
+#         host_status = data.get('host_status')
+#         location = data.get('location')
+#         about = data.get('about')
+#         hosting_since = data.get('hosting_since')
+#         password = data.get('password')
+#         email = data.get('email')
+#         bcrypt_pass = bcrypt.generate_password_hash(
+#             password, rounds=5).decode("UTF-8")
 
-        user = db.host.find_one({"email": email})
-        if user:
-            return jsonify({"message": "you are already registered"}), 401
+#         user = db.host.find_one({"email": email})
+#         if user:
+#             return jsonify({"message": "you are already registered"}), 401
 
-        # Insert host data into the MongoDB collection
-        db.host.insert_one({
-            "name":name,
-            "host_status":host_status,
-            "location":location,
-            "email":email,
-            "password":bcrypt_pass,
-            "about":about,
-            "hosting_since":hosting_since
-        }
-        )
-        # setHost.save()
-        return jsonify({"message": "Host created successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/host/login', methods=['POST'])
-def login_host():
-    try:
-        data = request.json
-        email = data.get('email')
-        password = data.get('password')
-
-        # Retrieve the user data from the MongoDB collection based on the provided email
-        user = db.host.find_one({"email": email})
-        if user and bcrypt.check_password_hash(user['password'], password):
-            # Password is correct, user is authenticated
-            # Generate JWT access token with expiry time (e.g., 1 hour)
-            access_token_payload = {
-                "email": email,
-                "exp": datetime.utcnow() + timedelta(hours=1)
-            }
-            access_token = jwt.encode(
-                access_token_payload, secret_key, algorithm="HS256")
-
-            return jsonify({"access_token": access_token, "message": "Login successful"}), 200
-
-        else:
-            # Invalid credentials
-            return jsonify({"message": "Invalid email or password"}), 401
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#         # Insert host data into the MongoDB collection
+#         db.host.insert_one({
+#             "name":name,
+#             "host_status":host_status,
+#             "location":location,
+#             "email":email,
+#             "password":bcrypt_pass,
+#             "about":about,
+#             "hosting_since":hosting_since
+#         }
+#         )
+#         # setHost.save()
+#         return jsonify({"message": "Host created successfully"}), 201
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/host/all", methods=["GET"])
-def host_all():
-    allHosts = db.host.find()
+# @app.route('/host/login', methods=['POST'])
+# def login_host():
+#     try:
+#         data = request.json
+#         email = data.get('email')
+#         password = data.get('password')
 
-    return json.loads(json_util.dumps(allHosts))
+#         # Retrieve the user data from the MongoDB collection based on the provided email
+#         user = db.host.find_one({"email": email})
+#         if user and bcrypt.check_password_hash(user['password'], password):
+#             # Password is correct, user is authenticated
+#             # Generate JWT access token with expiry time (e.g., 1 hour)
+#             access_token_payload = {
+#                 "email": email,
+#                 "exp": datetime.utcnow() + timedelta(hours=1)
+#             }
+#             access_token = jwt.encode(
+#                 access_token_payload, secret_key, algorithm="HS256")
+
+#             return jsonify({"access_token": access_token, "message": "Login successful"}), 200
+
+#         else:
+#             # Invalid credentials
+#             return jsonify({"message": "Invalid email or password"}), 401
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/host/<host_id>', methods=['GET', 'PUT', 'DELETE'])
-def manage_host(host_id):
-    if request.method == 'GET':
-        try:
-            # Retrieve the host data from the MongoDB collection based on the provided host_id
-            host = db.host.find_one({"_id": ObjectId(host_id)})
-            print(host)
-            if host:
-                host["_id"] = str(host["_id"])
-                return jsonify(host)
-                # return jsonify({
-                #     "id": host['_id'],
-                #     "name": host['name'],
-                #     "host_status": host['host_status'],
-                #     "location": host['location'],
-                #     "email": host['email'],
-                #     "about": host['about'],
-                #     "hosting_since": host['hosting_since'].strftime("%m-%d-%Y")
-                # })
-            return jsonify({"message": "Host not found"}), 404
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+# @app.route("/host/all", methods=["GET"])
+# def host_all():
+#     allHosts = db.host.find()
 
-    elif request.method == 'PUT':
-        try:
-            data = request.json
-            name = data.get('name')
-            host_status = data.get('host_status')
-            location = data.get('location')
-            about = data.get('about')
-            # hosting_since = data.get('hosting_since')
+#     return json.loads(json_util.dumps(allHosts))
 
-            # Update the host data in the MongoDB collection based on the provided host_id
-            db.host.update_one({"_id": ObjectId(host_id)}, {
-                "$set": {
-                    "name": name,
-                    "host_status": host_status,
-                    "location": location,
-                    "about": about,
-                    # "hosting_since": datetime.strptime(hosting_since, "%m-%d-%Y")
-                }
-            })
 
-            return jsonify({"message": "Host updated successfully"}), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+# @app.route('/host/<host_id>', methods=['GET', 'PUT', 'DELETE'])
+# def manage_host(host_id):
+#     if request.method == 'GET':
+#         try:
+#             # Retrieve the host data from the MongoDB collection based on the provided host_id
+#             host = db.host.find_one({"_id": ObjectId(host_id)})
+#             print(host)
+#             if host:
+#                 host["_id"] = str(host["_id"])
+#                 return jsonify(host)
+#                 # return jsonify({
+#                 #     "id": host['_id'],
+#                 #     "name": host['name'],
+#                 #     "host_status": host['host_status'],
+#                 #     "location": host['location'],
+#                 #     "email": host['email'],
+#                 #     "about": host['about'],
+#                 #     "hosting_since": host['hosting_since'].strftime("%m-%d-%Y")
+#                 # })
+#             return jsonify({"message": "Host not found"}), 404
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
 
-    elif request.method == 'DELETE':
-        try:
-            # Delete the host data from the MongoDB collection based on the provided host_id
-            db.host.delete_one({"_id": ObjectId(host_id)})
+#     elif request.method == 'PUT':
+#         try:
+#             data = request.json
+#             name = data.get('name')
+#             host_status = data.get('host_status')
+#             location = data.get('location')
+#             about = data.get('about')
+#             # hosting_since = data.get('hosting_since')
 
-            return jsonify({"message": "Host deleted successfully"}), 200
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
+#             # Update the host data in the MongoDB collection based on the provided host_id
+#             db.host.update_one({"_id": ObjectId(host_id)}, {
+#                 "$set": {
+#                     "name": name,
+#                     "host_status": host_status,
+#                     "location": location,
+#                     "about": about,
+#                     # "hosting_since": datetime.strptime(hosting_since, "%m-%d-%Y")
+#                 }
+#             })
+
+#             return jsonify({"message": "Host updated successfully"}), 200
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
+
+#     elif request.method == 'DELETE':
+#         try:
+#             # Delete the host data from the MongoDB collection based on the provided host_id
+#             db.host.delete_one({"_id": ObjectId(host_id)})
+
+#             return jsonify({"message": "Host deleted successfully"}), 200
+#         except Exception as e:
+#             return jsonify({"error": str(e)}), 500
 
 
 # @app.route('/property', methods=['POST'])
