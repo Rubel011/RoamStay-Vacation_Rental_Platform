@@ -8,12 +8,12 @@ import os
 # from bson import json_util, ObjectId
 from flask import Flask, jsonify, request
 # from flask_bcrypt import Bcrypt
-# from flask_cors import CORS
+from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 port=os.getenv('PORT')
 app = Flask(__name__)
-# CORS(app)
+CORS(app)
 # bcrypt = Bcrypt(app)
 mongoUrl = os.getenv("MONGO_URI")
 secret_key = os.getenv("SECRET_KEY")
